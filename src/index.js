@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactShadowRoot from 'react-shadow-root';
-import './index.css';
+import './scss/index.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 

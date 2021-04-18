@@ -1,0 +1,17 @@
+// since this extension will be on other pages it would be unwise to do any styling outside the noted-chrome-extension
+
+// noted-chrome-extension window
+#noted-chrome-extension {
+    box-sizing: border-box;
+    font-size: 64.5%;
+    color: #FFFFFF;
+
+    position: fixed;
+    width: 25%;
+    height: 100vh;
+    top: 0;
+    right: 0;
+    overflow: hidden;
+    z-index: 10000;
+    background-color: #282C34;
+  } 
