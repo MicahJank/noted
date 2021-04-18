@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactShadowRoot from 'react-shadow-root';
-import './scss/index.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import './scss/container.scss';
+import { style } from './styles/global.css';
 
 const injectWrapper = document.body;
 const app = document.createElement('div');
@@ -15,6 +16,7 @@ if(injectWrapper) injectWrapper.prepend(app);
 ReactDOM.render(
   <ReactShadowRoot>
     <React.StrictMode>
+      <style>{style}</style>
       <App />
     </React.StrictMode>
   </ReactShadowRoot>,

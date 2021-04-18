@@ -51,9 +51,23 @@ chrome.browserAction.onClicked.addListener((tab) => {
     active = !active;
 });
 
-chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-        sendResponse({ message : Math.floor(Math.random() * 10 + 1) });
-        return true;
+// the extension needs to listen out for any incoming message request from the content script as well as the react app
+// in some cases the react app will send a message to the background script and the background script will send a message to the content script as a result
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    switch(request.message) {
+        case 'screencapture':
+            // sendResponse({ message: 'capture the screen' });
+            chrome.tabs.query({ active: true, currentWindow: true }, tabs => { 
+                const activeTab = tabs[0];
+                // the 'screencapture' message essentially tells the extension to capture the current screen, then we send the formatted image result back to the react app to process
+                chrome.tabs.captureVisibleTab(tabs.windowId, { format: 'png' }, image => {
+                    sendResponse({ message: image });
+                })
+            })
+            break;
+        
+        default:
+            sendResponse({ error: 'Request message is not valid',  requestMessage: request.message });
     }
-);
+    return true;
+});
