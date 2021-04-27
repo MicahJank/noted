@@ -1,7 +1,6 @@
 /* global chrome */
 import React, { useState } from 'react';
 import Top from './components/Top.js';
-import './scss/global.scss';
 
 function App() {
 

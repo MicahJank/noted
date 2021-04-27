@@ -60,12 +60,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             chrome.tabs.query({ active: true, currentWindow: true }, tabs => { 
                 const activeTab = tabs[0];
                 // the 'screencapture' message essentially tells the extension to capture the current screen, then we send the formatted image result back to the react app to process
-                chrome.tabs.captureVisibleTab(tabs.windowId, { format: 'png' }, image => {
+                chrome.tabs.captureVisibleTab(activeTab.windowId, { format: 'png' }, image => {
+                    console.log(image);
                     sendResponse({ message: image });
                 })
             })
             break;
-        
+        case 'crop':
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                const activeTab = tabs[0];
+                chrome.tabs.sendMessage(activeTab.id, { message: 'init' });
+            })
+            break;
         default:
             sendResponse({ error: 'Request message is not valid',  requestMessage: request.message });
     }

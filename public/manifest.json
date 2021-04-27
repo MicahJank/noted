@@ -27,5 +27,10 @@
       "activeTab",
       "storage",
       "contextMenus"
+  ],
+  "web_accessible_resources": [
+    "overlay.html",
+    "/static/*"
+    
   ]
 }

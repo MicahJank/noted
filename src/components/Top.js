@@ -1,15 +1,17 @@
 /* global chrome */
 import React, { useState } from 'react';
-import '../scss/global.scss';
 
 const Top = () => {
     const [message, setMessage] = useState(false);
 
     const handleMessage = async () => {
-        chrome.runtime.sendMessage({ message: "screencapture" }, function(response) {
+        chrome.runtime.sendMessage({ message: "crop" }, function(response) {
             console.log(response);
-            setMessage(response.message);
+            // setMessage(response.message);
         })
+
+        // let test = await chrome.runtime.sendMessage({ message: "screencapture" })
+        // console.log(test);
       }
       return (
         <>
