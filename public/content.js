@@ -5,14 +5,22 @@ function run(request, sender, sendResponse) {
         console.log('from content.js');
         let shadowContainer = document.createElement('div');
         shadowContainer.id = 'extension--shadow-container';
-        let overlay = document.createElement('div');
-        overlay.id = 'crop-overlay';
-        overlay.className = 'overlay';
+        // let overlay = document.createElement('div');
+        // overlay.id = 'crop-overlay';
+        // overlay.className = 'overlay';
         let shadow = shadowContainer.attachShadow({ mode: 'open' });
         let style = document.createElement('style');
 
-        let testContainer = document.createElement('div');
-        testContainer.className = 'test';
+        // let testContainer = document.createElement('div');
+        // testContainer.className = 'test';
+
+        let canvas = document.createElement('canvas');
+        canvas.id = 'crop-overlay';
+        // canvas.width = '1000';
+        // canvas.height = '1000';
+
+        let overlayCrop = document.createElement('div');
+        overlayCrop.id = 'overlay-crop';
 
         style.textContent = `
             .overlay {
@@ -34,12 +42,63 @@ function run(request, sender, sendResponse) {
                 filter: opacity(1);
                 background-color: #fff;
             }
+
+            #crop-overlay {
+                position: absolute;
+                top: 0;
+                background-color: RGBA(0,0,0,0.3);
+                cursor: crosshair;
+            }
+
+            #overlay-crop {
+                width: 100%;
+                height: 500px;
+
+            }
         `
         shadowContainer.appendChild(shadow);
         shadow.appendChild(style);
-        shadow.appendChild(overlay);
-        overlay.appendChild(testContainer);
+        // shadow.appendChild(overlay);
+        // overlay.appendChild(testContainer);
+        shadow.appendChild(canvas);
+        shadow.appendChild(overlayCrop);
         document.body.appendChild(shadowContainer);
+
+        const ctx = canvas.getContext('2d');
+        ctx.canvas.width = window.innerWidth;
+        ctx.canvas.height = window.innerHeight;
+        let canvasX = $(canvas).offset().left;
+        let canvasY = $(canvas).offset().top;
+        let lastMouseX = lastMouseY = 0;
+        let mouseX = mouseY = 0;
+        let mouseDown = false;
+
+        $(canvas).on('mousedown', function(e) {
+            lastMouseX = parseInt(e.clientX-canvasX);
+            lastMouseY = parseInt(e.clientY-canvasY);
+            mouseDown = true;
+        });
+
+        $(canvas).on('mouseup', function(e) {
+            mouseDown = false;
+        });
+
+        $(canvas).on('mousemove', function(e) {
+            mouseX = parseInt(e.clientX-canvasX);
+            mouseY = parseInt(e.clientY-canvasY);
+
+            if(mouseDown) {
+                ctx.clearRect(0,0,canvas.width,canvas.height); //clear canvas
+                ctx.beginPath();
+                let width = mouseX-lastMouseX;
+                let height = mouseY-lastMouseY;
+                ctx.rect(lastMouseX,lastMouseY,width,height);
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+
+        })
     }
     // return true;
 }
