@@ -19,8 +19,8 @@ function run(request, sender, sendResponse) {
         // canvas.width = '1000';
         // canvas.height = '1000';
 
-        let overlayCrop = document.createElement('div');
-        overlayCrop.id = 'overlay-crop';
+        // let overlayCrop = document.createElement('div');
+        // overlayCrop.id = 'overlay-crop';
 
         style.textContent = `
             .overlay {
@@ -61,7 +61,7 @@ function run(request, sender, sendResponse) {
         // shadow.appendChild(overlay);
         // overlay.appendChild(testContainer);
         shadow.appendChild(canvas);
-        shadow.appendChild(overlayCrop);
+        // shadow.appendChild(overlayCrop);
         document.body.appendChild(shadowContainer);
 
         const ctx = canvas.getContext('2d');
@@ -98,6 +98,12 @@ function run(request, sender, sendResponse) {
                 ctx.stroke();
             }
 
+        })
+
+        window.addEventListener('resize', function() {
+            console.log('resizing happening')
+            ctx.canvas.width = window.innerWidth;
+            ctx.canvas.height = window.innerHeight;
         })
     }
     // return true;
