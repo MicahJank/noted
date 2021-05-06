@@ -16,6 +16,8 @@ function run(request, sender, sendResponse) {
 
         let canvas = document.createElement('canvas');
         canvas.id = 'crop-overlay';
+        const invisibleDiv = document.createElement('div');
+        invisibleDiv.id = 'hiddenDiv';
         // canvas.width = '1000';
         // canvas.height = '1000';
 
@@ -44,9 +46,9 @@ function run(request, sender, sendResponse) {
             }
 
             #crop-overlay {
+                z-index: 30000;
                 position: absolute;
                 top: 0;
-                background-color: RGBA(0,0,0,0);
                 cursor: crosshair;
             }
 
@@ -55,12 +57,21 @@ function run(request, sender, sendResponse) {
                 height: 500px;
 
             }
+
+            #hiddenDiv {
+                z-index: 2000
+                width: 100vw;
+                height: 100vh;
+                position: absolute;
+                top: 0;
+            }
         `
         shadowContainer.appendChild(shadow);
         shadow.appendChild(style);
         // shadow.appendChild(overlay);
         // overlay.appendChild(testContainer);
         shadow.appendChild(canvas);
+        shadow.appendChild(invisibleDiv);
         // shadow.appendChild(overlayCrop);
         document.body.appendChild(shadowContainer);
 
@@ -72,7 +83,8 @@ function run(request, sender, sendResponse) {
         let lastMouseX = lastMouseY = 0;
         let mouseX = mouseY = 0;
         let mouseDown = false;
-
+        
+        ctx.fillStyle = 'RGBA(0,0,0,0.3)';
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
         $(canvas).on('mousedown', function(e) {
@@ -91,7 +103,7 @@ function run(request, sender, sendResponse) {
 
             if(mouseDown) {
                 ctx.clearRect(0,0,canvas.width,canvas.height); //clear canvas
-                ctx.fillStyle = 'black';
+                ctx.fillStyle = 'RGBA(0,0,0,0.3)';
                 ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); // redraw the part that shouldnt be cleared
 
                 ctx.save();
