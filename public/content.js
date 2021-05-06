@@ -46,7 +46,7 @@ function run(request, sender, sendResponse) {
             #crop-overlay {
                 position: absolute;
                 top: 0;
-                background-color: RGBA(0,0,0,0.3);
+                background-color: RGBA(0,0,0,0);
                 cursor: crosshair;
             }
 
@@ -73,6 +73,8 @@ function run(request, sender, sendResponse) {
         let mouseX = mouseY = 0;
         let mouseDown = false;
 
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
         $(canvas).on('mousedown', function(e) {
             lastMouseX = parseInt(e.clientX-canvasX);
             lastMouseY = parseInt(e.clientY-canvasY);
@@ -89,19 +91,27 @@ function run(request, sender, sendResponse) {
 
             if(mouseDown) {
                 ctx.clearRect(0,0,canvas.width,canvas.height); //clear canvas
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); // redraw the part that shouldnt be cleared
+
+                ctx.save();
                 ctx.beginPath();
                 let width = mouseX-lastMouseX;
                 let height = mouseY-lastMouseY;
+                // ctx.fillStyle = 'white';
+                // ctx.fillRect(lastMouseX,lastMouseY,width,height);
                 ctx.rect(lastMouseX,lastMouseY,width,height);
                 ctx.strokeStyle = 'white';
-                ctx.lineWidth = 3;
+                ctx.lineWidth = 1;
                 ctx.stroke();
+                ctx.clip();
+                ctx.clearRect(lastMouseX,lastMouseY,width,height);
+                ctx.restore();
             }
 
         })
 
         window.addEventListener('resize', function() {
-            console.log('resizing happening')
             ctx.canvas.width = window.innerWidth;
             ctx.canvas.height = window.innerHeight;
         })
