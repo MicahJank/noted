@@ -1,61 +1,36 @@
 chrome.runtime.onMessage.addListener(run);
-//background-color: RGBA(0,0,0,0.59)
+
 function run(request, sender, sendResponse) {
     if(request.message === 'init') {
-        console.log('from content.js');
-        let shadowContainer = document.createElement('div');
+        createCropOverlay();
+    }
+    // return true;
+}
+
+
+// when the user adds a new note the first thing they need to do is take a quick snapshot of what it is they want to remember - therefore the first thing that pops up should be the
+// overlay screenshot/crop screen so they can take the snapshot
+function createCropOverlay() {
+    // dont want the screenshot overlay effected by the pages css so using shadow-root to create an part of the page that will contain its own css apart from the native webpage
+    const shadowContainer = document.createElement('div');
         shadowContainer.id = 'extension--shadow-container';
-        // let overlay = document.createElement('div');
-        // overlay.id = 'crop-overlay';
-        // overlay.className = 'overlay';
-        let shadow = shadowContainer.attachShadow({ mode: 'open' });
-        let style = document.createElement('style');
+        const shadow = shadowContainer.attachShadow({ mode: 'open' });
+        const style = document.createElement('style');
 
-        // let testContainer = document.createElement('div');
-        // testContainer.className = 'test';
-
-        let canvas = document.createElement('canvas');
+        // canvas is used because of its clipping capabilities, essentially what is happening is a canvas element is being created that takes up the entire viewport of the website
+        // then the user can draw on the canvas using a rectangle that 'clips' the canvas, thus the area that is clipped becomes the area the user is taking a screenshot of
+        const canvas = document.createElement('canvas');
         canvas.id = 'crop-overlay';
+        // the invisibleDiv element is created so the user cant click and interact with the webpage below
         const invisibleDiv = document.createElement('div');
         invisibleDiv.id = 'hiddenDiv';
-        // canvas.width = '1000';
-        // canvas.height = '1000';
-
-        // let overlayCrop = document.createElement('div');
-        // overlayCrop.id = 'overlay-crop';
 
         style.textContent = `
-            .overlay {
-                position: absolute;
-                top: 0;
-                background-color: RGBA(0,0,0);
-                width: 100vw;
-                height: 100vh;
-                cursor: crosshair;
-                filter: opacity(0.2);
-            }
-
-            .test {
-                position: absolute;
-                top: 30%;
-                left: 30%;
-                width: 300px;
-                height: 200px;
-                filter: opacity(1);
-                background-color: #fff;
-            }
-
             #crop-overlay {
                 z-index: 30000;
                 position: absolute;
                 top: 0;
                 cursor: crosshair;
-            }
-
-            #overlay-crop {
-                width: 100%;
-                height: 500px;
-
             }
 
             #hiddenDiv {
@@ -68,11 +43,8 @@ function run(request, sender, sendResponse) {
         `
         shadowContainer.appendChild(shadow);
         shadow.appendChild(style);
-        // shadow.appendChild(overlay);
-        // overlay.appendChild(testContainer);
         shadow.appendChild(canvas);
         shadow.appendChild(invisibleDiv);
-        // shadow.appendChild(overlayCrop);
         document.body.appendChild(shadowContainer);
 
         const ctx = canvas.getContext('2d');
@@ -104,14 +76,12 @@ function run(request, sender, sendResponse) {
             if(mouseDown) {
                 ctx.clearRect(0,0,canvas.width,canvas.height); //clear canvas
                 ctx.fillStyle = 'RGBA(0,0,0,0.3)';
-                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); // redraw the part that shouldnt be cleared
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); // redraw the part that shouldnt be cleared -i.e the opaque bg
 
                 ctx.save();
                 ctx.beginPath();
                 let width = mouseX-lastMouseX;
                 let height = mouseY-lastMouseY;
-                // ctx.fillStyle = 'white';
-                // ctx.fillRect(lastMouseX,lastMouseY,width,height);
                 ctx.rect(lastMouseX,lastMouseY,width,height);
                 ctx.strokeStyle = 'white';
                 ctx.lineWidth = 1;
@@ -123,10 +93,11 @@ function run(request, sender, sendResponse) {
 
         })
 
+        // the canvas needs to be redrawn if the user resizes the window, otherwise there will be areas that arent covered fully by the overlay crop
         window.addEventListener('resize', function() {
             ctx.canvas.width = window.innerWidth;
             ctx.canvas.height = window.innerHeight;
+            ctx.fillStyle = 'RGBA(0,0,0,0.3)';
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         })
-    }
-    // return true;
 }
