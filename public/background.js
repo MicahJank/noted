@@ -66,12 +66,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 })
             })
             break;
-        case 'crop':
+        case 'initialize':
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                 const activeTab = tabs[0];
                 chrome.tabs.sendMessage(activeTab.id, { message: 'init' });
             })
             break;
+        
+        case 'createScreenshot':
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                const activeTab = tabs[0];
+                chrome.tabs.captureVisibleTab(activeTab.windowId, { format: 'png' }, image => {
+                    // sendResponse({ message: image });
+                    chrome.tabs.sendMessage(activeTab.id, { message: 'crop', image, cropOptions: request.properties });
+                })
+                
+            })
+            break;
+
         default:
             sendResponse({ error: 'Request message is not valid',  requestMessage: request.message });
     }

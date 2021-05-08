@@ -3,6 +3,9 @@ chrome.runtime.onMessage.addListener(run);
 function run(request, sender, sendResponse) {
     if(request.message === 'init') {
         createCropOverlay();
+    } else if (request.message === 'crop') {
+        console.log(request);
+        cropImage(request.image, request.cropOptions);
     }
     // return true;
 }
@@ -65,8 +68,17 @@ function createCropOverlay() {
             mouseDown = true;
         });
 
-        $(canvas).on('mouseup', function(e) {
+        $(canvas).on('mouseup', async function(e) {
+            console.log('Mouse Up!');
+            console.log("cropStartX: ", lastMouseX);
+            console.log("cropStartY: ", lastMouseY);
+            console.log("cropEndX: ", mouseX);
+            console.log("cropEndY: ", mouseY);
             mouseDown = false;
+
+            // on the mouse up the details for the image should be sent to the background.js so it can take a snapshot of the window and then send all the details back to be cropped
+            chrome.runtime.sendMessage({ message: "createScreenshot", properties: { cropX: lastMouseX, cropY: lastMouseY, width: mouseX, height: mouseY } })
+            
         });
 
         $(canvas).on('mousemove', function(e) {
@@ -100,4 +112,9 @@ function createCropOverlay() {
             ctx.fillStyle = 'RGBA(0,0,0,0.3)';
             ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         })
+}
+
+// the area the user selected with their mouse in createCropOverlay is used to crop the image that the background.js screenshot and sent back to the content.js
+function cropImage(image, cropOptions) {
+
 }

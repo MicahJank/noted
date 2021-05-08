@@ -5,7 +5,7 @@ const Top = () => {
     const [message, setMessage] = useState(false);
 
     const handleMessage = async () => {
-        chrome.runtime.sendMessage({ message: "crop" }, function(response) {
+        chrome.runtime.sendMessage({ message: "initialize" }, function(response) {
             console.log(response);
             // setMessage(response.message);
         })
