@@ -4,7 +4,7 @@ function run(request, sender, sendResponse) {
     if(request.message === 'init') {
         createCropOverlay();
     } else if (request.message === 'crop') {
-        console.log(request);
+        // console.log(request);
         cropImage(request.image, request.cropOptions);
     }
     // return true;
@@ -116,5 +116,50 @@ function createCropOverlay() {
 
 // the area the user selected with their mouse in createCropOverlay is used to crop the image that the background.js screenshot and sent back to the content.js
 function cropImage(image, cropOptions) {
+    const shadowContainer = document.createElement('div');
+    shadowContainer.id = 'extension--note-modal';
+    const shadow = shadowContainer.attachShadow({ mode: 'open' });
+    const style = document.createElement('style');
+    const canvas = document.createElement('canvas');
+    canvas.id = 'cropped-image';
 
+    style.textContent = `
+            #cropped-image {
+                z-index: 30000;
+                position: absolute;
+                top: 0;
+            }
+    `;
+
+    shadowContainer.appendChild(shadow);
+    shadow.appendChild(style);
+    shadow.appendChild(canvas);
+    document.body.appendChild(shadowContainer);
+
+    // const canvasTest = document.getElementById('crop-overlay');
+    // document.body.appendChild(canvas);
+    // const ctx = canvasTest.getContext('2d');
+    const ctx = canvas.getContext('2d');
+    const htmlImg = document.createElement('img');
+    htmlImg.id = 'screenshot';
+    htmlImg.src = image;
+    console.log(htmlImg);
+    drawImg(ctx, image, cropOptions)
+    // document.body.appendChild(htmlImg);
+    
+
+
+    // after cropping the image and after the user enters in the information for the note they want saved, all that info should be sent to the background script to process and send
+    // to the server as well as to the react app to display
+    chrome.runtime.sendMessage({ message: "saveNote" })
+
+}
+
+// cropping is working but its not able to get the right crop measurements, will need to figure that out
+function drawImg(ctx, data, options) {
+    const img = new Image();
+    img.onload = function() {
+        ctx.drawImage(img, options.cropX, options.cropY, options.width, options.height, 0, 0, options.width, options.height);
+    }
+    img.src = data;
 }

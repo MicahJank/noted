@@ -69,7 +69,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         case 'initialize':
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                 const activeTab = tabs[0];
-                chrome.tabs.sendMessage(activeTab.id, { message: 'init' });
+                chrome.tabs.sendMessage(activeTab.id, { message: 'init' })
             })
             break;
         
@@ -84,6 +84,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             })
             break;
 
+        case 'saveNote':
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                const activeTab = tabs[0];
+                chrome.tabs.sendMessage(activeTab.id, { message: 'note' });
+            })
+            break;
         default:
             sendResponse({ error: 'Request message is not valid',  requestMessage: request.message });
     }

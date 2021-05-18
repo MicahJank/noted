@@ -2,7 +2,15 @@
 import React, { useState } from 'react';
 
 const Top = () => {
+    // chrome.runtime.onMessage.addListener(test);
     const [message, setMessage] = useState(false);
+
+    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+      console.log(request);
+      if(request.message === "note") {
+        console.log('working!');
+      }
+    })
 
     const handleMessage = async () => {
         chrome.runtime.sendMessage({ message: "initialize" }, function(response) {
@@ -13,6 +21,12 @@ const Top = () => {
         // let test = await chrome.runtime.sendMessage({ message: "screencapture" })
         // console.log(test);
       }
+
+    // const test = (request, sender, sendResponse) => {
+    //     if(request.message === 'test') {
+    //         console.log('test in progress');
+    //     }
+    // }
       return (
         <>
         <div className="top-container">
