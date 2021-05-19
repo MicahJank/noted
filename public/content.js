@@ -5,7 +5,7 @@ function run(request, sender, sendResponse) {
         createCropOverlay();
     } else if (request.message === 'crop') {
         // console.log(request);
-        cropImage(request.image, request.cropOptions);
+        createNote(request.image, request.cropOptions);
     }
     // return true;
 }
@@ -74,10 +74,12 @@ function createCropOverlay() {
             console.log("cropStartY: ", lastMouseY);
             console.log("cropEndX: ", mouseX);
             console.log("cropEndY: ", mouseY);
+            let width = mouseX-lastMouseX;
+            let height = mouseY-lastMouseY;
             mouseDown = false;
 
             // on the mouse up the details for the image should be sent to the background.js so it can take a snapshot of the window and then send all the details back to be cropped
-            chrome.runtime.sendMessage({ message: "createScreenshot", properties: { cropX: lastMouseX, cropY: lastMouseY, width: mouseX, height: mouseY } })
+            chrome.runtime.sendMessage({ message: "createScreenshot", properties: { cropX: lastMouseX, cropY: lastMouseY, width: width, height: height } })
             
         });
 
@@ -114,14 +116,53 @@ function createCropOverlay() {
         })
 }
 
-// the area the user selected with their mouse in createCropOverlay is used to crop the image that the background.js screenshot and sent back to the content.js
-function cropImage(image, cropOptions) {
+// the area the user selected with their mouse in createCropOverlay is used to crop the image that the background.js screenshot captured and sent back here to the content.js
+// createNote actually does the work of cropping the image and creating the modal for the user to enter their information in
+function createNote(image, cropOptions) {
     const shadowContainer = document.createElement('div');
     shadowContainer.id = 'extension--note-modal';
     const shadow = shadowContainer.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
+
     const canvas = document.createElement('canvas');
+    canvas.width = cropOptions.width;
+    canvas.height = cropOptions.height;
     canvas.id = 'cropped-image';
+
+    const modal = document.createElement('div');
+    modal.id = 'noteModal-container';
+    const noteForm = document.createElement('form');
+    noteForm.id = 'form-note';
+    modal.appendChild(noteForm);
+    
+    const top = document.createElement('div');
+    top.id = 'top-area';
+    const title = document.createElement('input');
+    title.id = 'note-title';
+    noteForm.appendChild(top);
+    top.appendChild(title);
+    
+    const middle = document.createElement('div');
+    middle.id = 'middle-area';
+    const imageContainer = document.createElement('div');
+    imageContainer.id = 'image-container';
+    const notes = document.createElement('textarea');
+    notes.id = 'notes-area';
+    noteForm.appendChild(middle);
+    middle.appendChild(imageContainer);
+    imageContainer.appendChild(canvas);
+    middle.appendChild(notes);
+    
+    const bottom = document.createElement('div');
+    bottom.id = 'bottom-area';
+    const cancelButton = document.createElement('button');
+    cancelButton.id = 'cancel';
+    const saveNote = document.createElement('button');
+    saveNote.id = 'save-note';
+    noteForm.appendChild(bottom);
+    bottom.appendChild(cancelButton);
+    bottom.appendChild(saveNote);
+
 
     style.textContent = `
             #cropped-image {
@@ -129,25 +170,34 @@ function cropImage(image, cropOptions) {
                 position: absolute;
                 top: 0;
             }
+
+            #noteModal-container {
+                position: absolute;
+                z-index: 30000;
+                top: 0;
+                width: 70%;
+            }
+
+            #form-note {
+                display: flex;
+                flex-direction: column;
+                width: 90%;
+                
+            }
     `;
 
     shadowContainer.appendChild(shadow);
     shadow.appendChild(style);
-    shadow.appendChild(canvas);
     document.body.appendChild(shadowContainer);
+    shadow.appendChild(modal);
+    // shadow.appendChild(canvas);
 
-    // const canvasTest = document.getElementById('crop-overlay');
-    // document.body.appendChild(canvas);
-    // const ctx = canvasTest.getContext('2d');
     const ctx = canvas.getContext('2d');
     const htmlImg = document.createElement('img');
     htmlImg.id = 'screenshot';
     htmlImg.src = image;
     console.log(htmlImg);
     drawImg(ctx, image, cropOptions)
-    // document.body.appendChild(htmlImg);
-    
-
 
     // after cropping the image and after the user enters in the information for the note they want saved, all that info should be sent to the background script to process and send
     // to the server as well as to the react app to display
@@ -155,7 +205,7 @@ function cropImage(image, cropOptions) {
 
 }
 
-// cropping is working but its not able to get the right crop measurements, will need to figure that out
+
 function drawImg(ctx, data, options) {
     const img = new Image();
     img.onload = function() {
