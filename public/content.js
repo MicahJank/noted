@@ -124,16 +124,18 @@ function createNote(image, cropOptions) {
     const shadow = shadowContainer.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
 
-    const canvas = document.createElement('canvas');
-    canvas.width = cropOptions.width;
-    canvas.height = cropOptions.height;
-    canvas.id = 'cropped-image';
-
     const modal = document.createElement('div');
     modal.id = 'noteModal-container';
     const noteForm = document.createElement('form');
     noteForm.id = 'form-note';
     modal.appendChild(noteForm);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = cropOptions.width;
+    canvas.height = cropOptions.height;
+    canvas.id = 'cropped-image';
+    modal.appendChild(canvas);
+
     
     const top = document.createElement('div');
     top.id = 'top-area';
@@ -150,39 +152,59 @@ function createNote(image, cropOptions) {
     notes.id = 'notes-area';
     noteForm.appendChild(middle);
     middle.appendChild(imageContainer);
-    imageContainer.appendChild(canvas);
     middle.appendChild(notes);
     
     const bottom = document.createElement('div');
     bottom.id = 'bottom-area';
     const cancelButton = document.createElement('button');
     cancelButton.id = 'cancel';
+    cancelButton.innerText = 'Cancel';
     const saveNote = document.createElement('button');
     saveNote.id = 'save-note';
+    saveNote.innerText = 'Save Note';
     noteForm.appendChild(bottom);
     bottom.appendChild(cancelButton);
     bottom.appendChild(saveNote);
+    
 
 
     style.textContent = `
             #cropped-image {
-                z-index: 30000;
-                position: absolute;
-                top: 0;
+                display: none;
             }
 
             #noteModal-container {
                 position: absolute;
                 z-index: 30000;
-                top: 0;
-                width: 70%;
+                background-color: #282C34;
+                top: 20%;
+                left: 25%;
+                width: 50%;
+                padding: 40px;
             }
 
             #form-note {
                 display: flex;
                 flex-direction: column;
+                align-items: center;
                 width: 90%;
-                
+                margin: 0 auto;
+            }
+
+            #top-area,#middle-area,bottom-area {
+                width: 100%;
+            }
+
+            #top-area #note-title {
+                width: 100%;
+            }
+
+            #middle-area #image-container, #middle-area #notes-area {
+                width: 100%;
+            }
+
+            #bottom-area button  {
+
             }
     `;
 
@@ -190,14 +212,18 @@ function createNote(image, cropOptions) {
     shadow.appendChild(style);
     document.body.appendChild(shadowContainer);
     shadow.appendChild(modal);
-    // shadow.appendChild(canvas);
+    
 
-    const ctx = canvas.getContext('2d');
-    const htmlImg = document.createElement('img');
-    htmlImg.id = 'screenshot';
-    htmlImg.src = image;
-    console.log(htmlImg);
-    drawImg(ctx, image, cropOptions)
+    // the canvas ctx.drawImage needs to have the image base created first so that the screenshot the user takes can be cropped to a canvas before processing it into a normal <img>
+    const imageBase = createImageBase(image);
+    // to have the processImg work properly, the canvas needs to be drawn to the imageBase first, hence why we have the processImg and imageContainer.appendChild inside the onload function here
+    // otherwise the processImg wouldnt process at the right time (needs to wait for the image to load first)
+    imageBase.onload = function() {
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(imageBase, cropOptions.cropX, cropOptions.cropY, cropOptions.width, cropOptions.height, 0, 0, cropOptions.width, cropOptions.height);
+        const finalImg = processImg(canvas);
+        imageContainer.appendChild(finalImg);
+    }
 
     // after cropping the image and after the user enters in the information for the note they want saved, all that info should be sent to the background script to process and send
     // to the server as well as to the react app to display
@@ -205,11 +231,19 @@ function createNote(image, cropOptions) {
 
 }
 
-
-function drawImg(ctx, data, options) {
+// simply takes in image data in a "data:img/format" format and then creates a base image to work off of
+function createImageBase(data) {
     const img = new Image();
-    img.onload = function() {
-        ctx.drawImage(img, options.cropX, options.cropY, options.width, options.height, 0, 0, options.width, options.height);
-    }
     img.src = data;
+    img.alt = 'base image for cropped screenshot';
+    return img;
+}
+
+// takes in a canvas element and returns a <img> version of the canvas - in this case its used because the canvas needs to be cropped (see ctx.drawImage above) and then transformed into a more usable
+// <img> format
+function processImg(canvas) {
+    let img = new Image();
+    img.src = canvas.toDataURL();
+    img.alt = 'cropped user image of website';
+    return img;
 }
