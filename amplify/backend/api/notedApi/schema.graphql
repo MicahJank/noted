@@ -1,0 +1,6 @@
+type Note @model {
+  id: ID!
+  title: String!
+  comment: String
+  imgData: String!
+}
