@@ -6,6 +6,12 @@ import reportWebVitals from './reportWebVitals';
 import './scss/container.scss';
 import { style } from './styles/global.css';
 
+import Amplify from 'aws-amplify';
+import awsExports from './aws-exports.js';
+
+
+Amplify.configure(awsExports);
+
 const injectWrapper = document.body;
 const app = document.createElement('div');
 
