@@ -4,4 +4,12 @@ export const style = `
     .screenshot {
         width: 200px;
     }
+
+    .note-card {
+        overflow-y: auto;
+    }
+
+    .note-img {
+        width: 100%;
+    }
 `;
