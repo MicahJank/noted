@@ -10,6 +10,6 @@ export const style = `
     }
 
     .note-img {
-        width: 100%;
+        width: 40%;
     }
 `;

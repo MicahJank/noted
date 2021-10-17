@@ -29,7 +29,7 @@ function App() {
         <div className="note-card">
           <h3>{note.title}</h3>
           <p>{note.comment}</p>
-          <img className="note-img" src={note.imgStr} />
+          <img className="note-img" src={note.imgStr} alt="saved note" />
         </div>)
       })}
     </div>
