@@ -55,6 +55,14 @@ chrome.browserAction.onClicked.addListener((tab) => {
 // in some cases the react app will send a message to the background script and the background script will send a message to the content script as a result
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch(request.message) {
+        // initialize message comes from Top.js
+        case 'initialize':
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                const activeTab = tabs[0];
+                chrome.tabs.sendMessage(activeTab.id, { message: 'init' })
+            })
+            break;
+
         case 'screencapture':
             // sendResponse({ message: 'capture the screen' });
             chrome.tabs.query({ active: true, currentWindow: true }, tabs => { 
@@ -64,12 +72,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     console.log(image);
                     sendResponse({ message: image });
                 })
-            })
-            break;
-        case 'initialize':
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                const activeTab = tabs[0];
-                chrome.tabs.sendMessage(activeTab.id, { message: 'init' })
             })
             break;
         
@@ -85,10 +87,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             break;
 
         case 'saveNote':
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                const activeTab = tabs[0];
-                chrome.tabs.sendMessage(activeTab.id, { message: 'note' });
-            })
+            fetch('http://localhost:6000/api/notes')
+                .then(response => response.json())
+                .then(data => console.log(data));
+            // chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            //     const activeTab = tabs[0];
+            //     chrome.tabs.sendMessage(activeTab.id, { message: 'note' });
+            // })
             break;
         default:
             sendResponse({ error: 'Request message is not valid',  requestMessage: request.message });

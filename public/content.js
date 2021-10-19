@@ -1,5 +1,7 @@
 chrome.runtime.onMessage.addListener(run);
 
+// run is the equivalent of the background.js switch/case, this function is passed to the onMessage listener above and if certain messages are sent to the content.js
+// then certain actions will be performed
 function run(request, sender, sendResponse) {
     if(request.message === 'init') {
         createCropOverlay();
@@ -55,19 +57,23 @@ function createCropOverlay() {
         ctx.canvas.height = window.innerHeight;
         let canvasX = $(canvas).offset().left;
         let canvasY = $(canvas).offset().top;
-        let lastMouseX = lastMouseY = 0;
-        let mouseX = mouseY = 0;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let mouseX = 0;
+        let mouseY = 0;
         let mouseDown = false;
         
         ctx.fillStyle = 'RGBA(0,0,0,0.3)';
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); 
 
+        // store the initial coords of the mouse when it is down so we can later calculate the crop area for the image the user wants
         $(canvas).on('mousedown', function(e) {
             lastMouseX = parseInt(e.clientX-canvasX);
             lastMouseY = parseInt(e.clientY-canvasY);
             mouseDown = true;
         });
 
+        // similar to above except when the mouse is up we need to regrab the coords so we can find the difference and calculate the what the user wants cropped
         $(canvas).on('mouseup', async function(e) {
             console.log('Mouse Up!');
             console.log("cropStartX: ", lastMouseX);
@@ -107,6 +113,7 @@ function createCropOverlay() {
 
         })
 
+        // TODO: The below code apepars to not be working
         // the canvas needs to be redrawn if the user resizes the window, otherwise there will be areas that arent covered fully by the overlay crop
         window.addEventListener('resize', function() {
             ctx.canvas.width = window.innerWidth;
@@ -227,6 +234,7 @@ function createNote(image, cropOptions) {
 
     // after cropping the image and after the user enters in the information for the note they want saved, all that info should be sent to the background script to process and send
     // to the server as well as to the react app to display
+    // chrome.runtime.sendMessage({ message: "saveNote" })
     chrome.runtime.sendMessage({ message: "saveNote" })
 
 }
@@ -235,7 +243,7 @@ function createNote(image, cropOptions) {
 function createImageBase(data) {
     const img = new Image();
     img.src = data;
-    img.alt = 'base image for cropped screenshot';
+    img.alt = 'base for cropped screenshot';
     return img;
 }
 
@@ -244,6 +252,6 @@ function createImageBase(data) {
 function processImg(canvas) {
     let img = new Image();
     img.src = canvas.toDataURL();
-    img.alt = 'cropped user image of website';
+    img.alt = 'cropped user screenshot of website';
     return img;
 }
