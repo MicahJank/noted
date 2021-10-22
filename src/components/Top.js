@@ -8,7 +8,10 @@ const Top = () => {
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       console.log(request);
       if(request.message === "note") {
-        console.log('working!');
+        fetch("http://localhost:5000/api/notes")
+        .then(res => res.json())
+        .then(res => console.log(res))
+        .catch(err => console.log(err));
       }
     })
 

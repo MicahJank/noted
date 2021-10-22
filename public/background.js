@@ -87,13 +87,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             break;
 
         case 'saveNote':
-            fetch('http://localhost:6000/api/notes')
-                .then(response => response.json())
-                .then(data => console.log(data));
-            // chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            //     const activeTab = tabs[0];
-            //     chrome.tabs.sendMessage(activeTab.id, { message: 'note' });
-            // })
+            // fetch('http://localhost:6000/api/notes')
+            //     .then(response => response.json())
+            //     .then(data => console.log(data));
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                const activeTab = tabs[0];
+                chrome.tabs.sendMessage(activeTab.id, { message: 'note' });
+            })
             break;
         default:
             sendResponse({ error: 'Request message is not valid',  requestMessage: request.message });
