@@ -6,7 +6,7 @@ function run(request, sender, sendResponse) {
     if(request.message === 'init') {
         createCropOverlay();
     } else if (request.message === 'crop') {
-        // console.log(request);
+        console.log(request.image);
         createNote(request.image, request.cropOptions);
     }
     // return true;
@@ -126,6 +126,7 @@ function createCropOverlay() {
 // the area the user selected with their mouse in createCropOverlay is used to crop the image that the background.js screenshot captured and sent back here to the content.js
 // createNote actually does the work of cropping the image and creating the modal for the user to enter their information in
 function createNote(image, cropOptions) {
+    console.log(image);
     const shadowContainer = document.createElement('div');
     shadowContainer.id = 'extension--note-modal';
     const shadow = shadowContainer.attachShadow({ mode: 'open' });
@@ -233,10 +234,22 @@ function createNote(image, cropOptions) {
     }
 
     // after cropping the image and after the user enters in the information for the note they want saved, all that info should be sent to the background script to process and send
-    // to the server as well as to the react app to display
-    // chrome.runtime.sendMessage({ message: "saveNote" })
-    chrome.runtime.sendMessage({ message: "saveNote" })
+    // to the server
+    // first the image needs to be converted to a blob format
+    convertBase64ToBlob(image);
 
+}
+
+// takes in a base64 image and converts to blob format
+function convertBase64ToBlob(img) {
+    fetch(img)
+    .then(res => {
+        return res.blob();
+    })
+    .then(res => {
+        console.log(res);
+        chrome.runtime.sendMessage({ message: "saveNote", imageBlob: res })
+    })
 }
 
 // simply takes in image data in a "data:img/format" format and then creates a base image to work off of
