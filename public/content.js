@@ -233,10 +233,8 @@ function createNote(image, cropOptions) {
         imageContainer.appendChild(finalImg);
     }
 
-    // after cropping the image and after the user enters in the information for the note they want saved, all that info should be sent to the background script to process and send
-    // to the server
-    // first the image needs to be converted to a blob format
-    convertBase64ToBlob(image);
+    // nodejs will send the image to the aws server for storage, so first we send the image to the react app to process and send to nodejs
+    chrome.runtime.sendMessage({ message: "saveNote", image })
 
 }
 
@@ -248,7 +246,6 @@ function convertBase64ToBlob(img) {
     })
     .then(res => {
         console.log(res);
-        chrome.runtime.sendMessage({ message: "saveNote", imageBlob: res })
     })
 }
 

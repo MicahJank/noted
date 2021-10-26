@@ -8,7 +8,7 @@ const Top = () => {
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       console.log(request);
       if(request.message === "note") {
-        fetch("http://localhost:5000/api/notes")
+        fetch("http://localhost:5000/api/notes/presignedUrl")
         .then(res => res.json())
         .then(res => console.log(res))
         .catch(err => console.log(err));
