@@ -92,7 +92,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             //     .then(data => console.log(data));
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                 const activeTab = tabs[0];
-                chrome.tabs.sendMessage(activeTab.id, { message: 'note' });
+                chrome.tabs.sendMessage(activeTab.id, { message: 'note', imgUrl: request.imageUrl });
             })
             break;
         default:
