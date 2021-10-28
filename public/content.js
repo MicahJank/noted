@@ -173,13 +173,6 @@ function createNote(image, cropOptions) {
     noteForm.appendChild(bottom);
     bottom.appendChild(cancelButton);
     bottom.appendChild(saveNote);
-
-
-    // update buttons to add click handlers -i.e saveNote needs to send the image to the react application when clicked on
-    saveNote.addEventListener('click', event => {
-        event.preventDefault();
-        sendImageToReact(image);
-    })
     
 
 
@@ -240,9 +233,13 @@ function createNote(image, cropOptions) {
         imageContainer.appendChild(finalImg);
     }
 
-    // sendImageToReact(image);
-    // nodejs will send the image to the aws server for storage, so first we send the image to the react app to process and send to nodejs
-    // chrome.runtime.sendMessage({ message: "saveNote", blobImg })
+      // update buttons to add click handlers -i.e saveNote needs to send the image to the react application when clicked on
+      // nodejs will send the image to the aws server for storage, so first we send the image to the react app to process and send to nodejs
+      saveNote.addEventListener('click', event => {
+        event.preventDefault();
+        chrome.runtime.sendMessage({ message: "saveNote", imageBase64: image })
+    });
+    
 
 }
 
@@ -254,7 +251,9 @@ function sendImageToReact(img) {
     })
     .then(blob => {
         const blobUrl = URL.createObjectURL(blob);
-        chrome.runtime.sendMessage({ message: "saveNote", imageUrl: blobUrl })
+        // const imgFile = new File([blob], "userImage", {type: 'image/*'});
+        // console.log(imgFile);
+        chrome.runtime.sendMessage({ message: "saveNote", blobUrl })
 
     })
 }

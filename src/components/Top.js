@@ -8,12 +8,39 @@ const Top = () => {
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       console.log(request);
       if(request.message === "note") {
-        fetch(`${process.env.REACT_APP_BACKEND_URL}/api/notes/presignedUrl`)
-        .then(res => res.json())
-        .then(res => console.log(res))
-        .catch(err => console.log(err));
+       convertImg(request.imageBase64)
+       .then(res => {
+         console.log(res);
+       })
+        // getS3SignUrl(request.imgFile.name, request.imgFile.type)
+        // .then(res => {
+        //   console.log(res);
+        // })
+        // .catch(err => {
+        //   console.log(err);
+        // })
+        
       }
     })
+
+    async function getS3SignUrl(filename, filetype) {
+      const headers = new Headers({ 'Content-Type': 'application/json' });
+      const options = {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ filename, filetype })
+      };
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/notes/presignedUrl`, options)
+      const presignedUrl = await response.json();
+      return presignedUrl
+    }
+
+    async function convertImg(base64Img) {
+      const img = await fetch(base64Img)
+      const imgBlob = await img.blob()
+      const imgFile = new File([imgBlob], "userImage", { type: "image/*" });
+       return imgFile
+    }
 
     const handleMessage = async () => {
         chrome.runtime.sendMessage({ message: "initialize" }, function(response) {
